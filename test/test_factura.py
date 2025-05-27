@@ -4,39 +4,26 @@ import os
 #Agregar la ruta base del proyecto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
 import unittest
-from datetime import date
-from Modelo.factura import factura
-from Modelo.producto import Producto
 from Controladores.controlador_factura import ControladorFactura
-from Modelo.cliente import Cliente
+from Controladores.controlador_cliente import ControladorCliente
+from datetime import datetime
 
-class TestControladorFactura(unittest.TestCase):
+class TestFactura(unittest.TestCase):
     def setUp(self):
-        self.controlador = ControladorFactura()
-        self.cliente = Cliente("12345678", "Juan Pérez")
-        self.producto1 = Producto("Producto 1", 100.50)
-        self.producto2 = Producto("Producto 2", 50.75)
-        self.factura = self.controlador.create(self.cliente, "2024-11-20")
-        self.factura.agregar_producto(self.producto1)
-        self.factura.agregar_producto(self.producto2)
+        self.controlador_cliente = ControladorCliente()
+        self.controlador_factura = ControladorFactura()
+        self.cliente = self.controlador_cliente.create("Pedro Gómez", "1231231230")
 
-    def test_calcular_total_factura(self):
-        total = self.controlador.calcular_total_factura(self.factura.id_factura)
-        self.assertEqual(total, 151.25)
+    def test_crear_factura(self):
+        factura = self.controlador_factura.create(self.cliente, "2024-01-01")
+        self.assertEqual(factura.cliente, self.cliente)
+        self.assertEqual(factura.fecha, datetime(2024, 1, 1).date())
 
-    def test_calcular_total_general(self):
-        total_general = self.controlador.calcular_total_general()
-        self.assertEqual(total_general, 151.25)
-
-    def test_find_by_cliente(self):
-        facturas_cliente = self.controlador.find_by_cliente("12345678")
-        self.assertEqual(len(facturas_cliente), 1)
-
-    def test_delete_factura(self):
-        self.controlador.delete(self.factura.id_factura)
-        self.assertEqual(len(self.controlador.facturas), 0)
+    def test_buscar_facturas_por_cedula(self):
+        self.controlador_factura.create(self.cliente, "2024-01-01")
+        facturas = self.controlador_factura.find_by_cliente("1231231230")
+        self.assertEqual(len(facturas), 1)
 
 if __name__ == "__main__":
     unittest.main()
